@@ -47,6 +47,16 @@ func validateCRD(crd runtime.Object) (result errors.ManifestResult) {
 	return result
 }
 
+func validateV1Beta1CRD(crd *v1beta1.CustomResourceDefinition) (result errors.ManifestResult) {
+	unversionedCRD := &apiextensions.CustomResourceDefinition{}
+	err := Scheme.Converter().Convert(crd, unversionedCRD, conversion.SourceToDest, nil)
+	if err != nil {
+		result.Add(errors.ErrInvalidParse("error converting versioned crd to unversioned crd", err))
+		return result
+	}
+	return result
+}
+
 func validateCRDUnversioned(crd *apiextensions.CustomResourceDefinition, gv schema.GroupVersion) (result errors.ManifestResult) {
 	errList := validation.ValidateCustomResourceDefinition(crd, gv)
 	for _, err := range errList {
